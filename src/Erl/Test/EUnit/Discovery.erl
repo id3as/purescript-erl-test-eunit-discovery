@@ -43,19 +43,27 @@ inject_module_name(ModuleName, Tests) -> Tests.
 
 
 %% TODO: This is not exhaustive and if EUnit changes, this will need adding to
-filterTests(FilterFn, []) ->
+filterTests(_FilterFn, []) ->
   [];
 filterTests(FilterFn, [ H | Tail ]) ->
   case H of
     _Suite = { Name, SubTests } when is_binary(Name) and is_list(SubTests) ->
-      [ { Name, filterTests(FilterFn, SubTests) } | filterTests(FilterFn, Tail) ];
-
+      case filterTests(FilterFn, SubTests) of
+        [] -> filterTests(FilterFn, Tail);
+        Filtered -> [ { Name, Filtered } | filterTests(FilterFn, Tail) ]
+      end;
 
     _SetupTeardown = { setup, Setup, Teardown, SubTests } ->
-      [ { setup, Setup, Teardown, filterTests(FilterFn, SubTests) } | filterTests(FilterFn, Tail) ];
+      case filterTests(FilterFn, SubTests) of
+        [] -> filterTests(FilterFn, Tail);
+        Filtered -> [ { setup, Setup, Teardown, Filtered } | filterTests(FilterFn, Tail) ]
+      end;
 
     _Timeout = { timeout, N, Tests } ->
-      [ { timeout, N, filterTests(FilterFn, Tests) } | filterTests(FilterFn, Tail) ];
+      case filterTests(FilterFn, Tests) of
+        [] -> filterTests(FilterFn, Tail);
+        Filtered -> [ { timeout, N, Filtered } | filterTests(FilterFn, Tail) ]
+      end;
 
     _Spawn = { spawn, {Name, TestFn} } ->
       case FilterFn(Name) of
