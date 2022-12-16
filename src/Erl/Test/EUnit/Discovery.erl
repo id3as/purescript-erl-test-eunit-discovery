@@ -22,7 +22,6 @@ getExportedTests(ModuleName) ->
   fun() ->
       case lists:member({tests,0}, ModuleName:module_info(exports)) of
         true -> 
-          io:format(user, "~p~n", [ModuleName:tests()]),
           {just, ModuleName:tests()};
         false -> {nothing}
       end
