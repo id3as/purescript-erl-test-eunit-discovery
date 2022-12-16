@@ -1,4 +1,5 @@
 let upstream =
-      https://github.com/purerl/package-sets/releases/download/erl-0.14.0-20210319/packages.dhall sha256:aa6d4bcef87080a6684464cfba5fb611b03c4a4372b1e08c77186de4a1f5b66f
+      https://github.com/purerl/package-sets/releases/download/erl-0.15.3-20220629/packages.dhall sha256:48ee9f3558c00e234eae6b8f23b4b8b66eb9715c7f2154864e1e425042a0723b
 
 in  upstream
+      with erl-test-eunit.version = "aa3ce09bc963bcbdb8a4be4ab766597d7f138d6a"

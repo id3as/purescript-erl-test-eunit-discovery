@@ -1,7 +1,7 @@
 -module(erl_tests_eUnit_discovery@foreign).
 
 -export([ findModuleNames/1
-        , getExportedTests/2
+        , getExportedTests/1
         , filterTests/2
         ]).
 
@@ -18,28 +18,15 @@ findModuleNames(Directory) ->
        filelib:wildcard(binary_to_list(Pattern)))
   end.
 
-getExportedTests(DisplayName, ModuleName) ->
+getExportedTests(ModuleName) ->
   fun() ->
       case lists:member({tests,0}, ModuleName:module_info(exports)) of
-        true -> {just, inject_module_name(DisplayName, ModuleName:tests())};
+        true -> 
+          io:format(user, "~p~n", [ModuleName:tests()]),
+          {just, ModuleName:tests()};
         false -> {nothing}
       end
   end.
-
-inject_module_name(ModuleName, Tests)
-  when is_tuple(Tests) ->
-    case element(1, Tests) of
-      group ->
-        { group, << (element(2, Tests))/binary, " (", ModuleName/binary, ")"  >>, inject_module_name(ModuleName, element(3, Tests)) };
-      _Other ->
-        list_to_tuple([ inject_module_name(ModuleName, element(X, Tests)) || X <- lists:seq(1, tuple_size(Tests)) ])
-    end;
-inject_module_name(ModuleName, Tests) -> Tests.
-
-
-
-
-
 
 
 %% TODO: This is not exhaustive and if EUnit changes, this will need adding to
