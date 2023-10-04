@@ -40,9 +40,19 @@ filterTests(FilterFn, [ H | Tail ]) ->
       end;
 
     _SetupTeardown = { setup, Setup, Teardown, SubTests } ->
-      case filterTests(FilterFn, SubTests) of
-        [] -> filterTests(FilterFn, Tail);
-        Filtered -> [ { setup, Setup, Teardown, Filtered } | filterTests(FilterFn, Tail) ]
+      case is_function(SubTests) of
+        true ->
+          %% TODO: Can't filter tests inside a test with an Instantiatior,
+          %% because that would require istantiating the tests.
+          %% The fix is probably to make filtering part of the EUnit library
+          %% so we can filter when we run the Free to generate the test tree,
+          %% instead of doing it after the fact
+          [ { setup, Setup, Teardown, SubTests } | filterTests(FilterFn, Tail) ];
+        false ->
+          case filterTests(FilterFn, SubTests) of
+            [] -> filterTests(FilterFn, Tail);
+            Filtered -> [ { setup, Setup, Teardown, Filtered } | filterTests(FilterFn, Tail) ]
+          end
       end;
 
     _Timeout = { timeout, N, Tests } ->
